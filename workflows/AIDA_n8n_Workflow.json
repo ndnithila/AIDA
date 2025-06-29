@@ -1,0 +1,173 @@
+{
+  "name": "AIDA_n8n_Workflow",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -400,
+        -220
+      ],
+      "id": "ba67c603-69ce-4c18-bec9-9a7f6b335065",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI&start=0&max_results=5&sortBy=submittedDate&sortOrder=descending",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -220,
+        -220
+      ],
+      "id": "4a0de29a-4ee8-4a31-bae3-8252047ffd0a",
+      "name": "FetcharXibpapers"
+    },
+    {
+      "parameters": {
+        "jsCode": "const raw = $json.data;\n\nif (!raw || typeof raw !== 'string') {\n  throw new Error(\"Raw XML data is missing or not a string.\");\n}\n\nconst matches = [...raw.matchAll(/<entry>([\\s\\S]*?)<\\/entry>/g)];\n\nconst results = matches.map(entry => {\n  const block = entry[1];\n  const get = tag => {\n    const match = block.match(new RegExp(`<${tag}>([\\\\s\\\\S]*?)<\\\\/${tag}>`));\n    return match ? match[1].replace(/\\s+/g, ' ').trim() : '';\n  };\n\n  return {\n    title: get(\"title\"),\n    summary: get(\"summary\"),\n    link: get(\"id\"),\n    published: get(\"published\")\n  };\n});\n\nreturn results.map(item => ({ json: item }));\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -60,
+        -220
+      ],
+      "id": "417749bd-3dbd-40fa-a63b-614b9cdb59f5",
+      "name": "Code"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1THfKi8s45UTBBPLFlwuR2GQUX5uYDovm4gaC6t903jw",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1THfKi8s45UTBBPLFlwuR2GQUX5uYDovm4gaC6t903jw/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "title": "title",
+            "summary": "summary",
+            "link": "link",
+            "published": "published"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "title",
+              "displayName": "title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "summary",
+              "displayName": "summary",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "link",
+              "displayName": "link",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "published",
+              "displayName": "published",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [
+        160,
+        -220
+      ],
+      "id": "a947e1de-5ad1-4929-84f0-2d8d263c1a9d",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "FaJztL1f6Q8AJWyA",
+          "name": "Google Sheets account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "FetcharXibpapers",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "FetcharXibpapers": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "versionId": "8096d939-1594-4fd7-adb5-74ae2bc0ae7b",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "b3b54242804b6107ca1ea45b6328a4c2f60189f575dd2c28d47368f7531ec7db"
+  },
+  "id": "C4Id2SPaQOWOcxtr",
+  "tags": []
+}
